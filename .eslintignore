@@ -1,0 +1,6 @@
+build
+out
+coverage
+node_modules
+.husky
+.idea
