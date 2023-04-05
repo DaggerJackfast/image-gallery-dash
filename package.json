@@ -11,8 +11,12 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.0.1",
+    "classnames": "^2.3.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-loader-spinner": "^5.3.4",
+    "react-router-dom": "^6.10.0"
   },
   "devDependencies": {
     "@types/node": "^18.15.11",

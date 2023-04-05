@@ -26,3 +26,7 @@ build
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables files
+.env
+!.env.example
