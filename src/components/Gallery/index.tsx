@@ -1,5 +1,8 @@
 import Image from "../Image";
 import React from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useQuery } from "react-query";
+import api, { getAuthHeader } from "../../lib/api";
 const images = [
   {
     id: "1",
@@ -50,7 +53,20 @@ const images = [
       "Nullam erat ante, lacinia quis volutpat et, finibus aliquet purus. Aenean semper purus sit amet interdum suscipit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Sed iaculis gravida tellus et tristique. Cras id arcu quis tortor cursus lobortis ut nec felis. Vestibulum nec nibh pretium, feugiat nulla efficitur, porta lacus. Donec vestibulum volutpat turpis sed elementum. Sed quis tellus ultricies, egestas arcu at, dignissim libero. Suspendisse nec velit nec ligula tincidunt dapibus. Maecenas laoreet mauris non nibh volutpat consectetur. Proin molestie turpis sed nulla vestibulum, vel fringilla nisl dignissim. Proin laoreet, lorem non rhoncus elementum, dolor turpis rhoncus nisi, in accumsan metus mauris vitae erat. Duis nisi quam, ultrices at ipsum id, laoreet imperdiet risus. Integer diam libero, varius in dictum a, ornare et est. Fusce scelerisque fermentum dui vel ornare. Donec sem libero, viverra quis justo vitae, bibendum vehicula nisi.",
   },
 ];
+
+const serverUri = process.env.REACT_APP_SERVER_URI;
+console.log("serverUri: ", serverUri);
 const Gallery = () => {
+  const { user, getAccessTokenSilently } = useAuth0();
+  console.log("user: ", user);
+  const { isLoading, error, data } = useQuery("images", async () =>
+    api.get("/images", {
+      headers: getAuthHeader(await getAccessTokenSilently()),
+    })
+  );
+  console.log("isLoading: ", isLoading);
+  console.log("error: ", error);
+  console.log("data: ", data);
   return (
     <>
       <h1 className="text-center font-bold py-10 text-3xl dark:text-white">

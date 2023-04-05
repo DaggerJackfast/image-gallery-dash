@@ -4,12 +4,13 @@ import Header from "./components/Header";
 import Gallery from "./components/Gallery";
 import Login from "./components/Login";
 import { useAuth0 } from "@auth0/auth0-react";
-
+import { QueryClient, QueryClientProvider } from "react-query";
+const queryClient = new QueryClient();
 const App = () => {
   const { isAuthenticated } = useAuth0();
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       {isAuthenticated ? (
         <>
           <Header />
@@ -18,7 +19,7 @@ const App = () => {
       ) : (
         <Login />
       )}
-    </>
+    </QueryClientProvider>
   );
 };
 
