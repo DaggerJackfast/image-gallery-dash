@@ -1,8 +1,10 @@
 import Image from "../Image";
-import React from "react";
+import React, { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useQuery } from "react-query";
 import api, { getAuthHeader } from "../../lib/api";
+import ImageModal from "../ImageModal";
+import { IImage } from "../../lib/types";
 const images = [
   {
     id: "1",
@@ -67,6 +69,10 @@ const Gallery = () => {
   console.log("isLoading: ", isLoading);
   console.log("error: ", error);
   console.log("data: ", data);
+
+  const [showImage, setShowImage] = useState<IImage | null>(null);
+  const onClose = () => setShowImage(null);
+
   return (
     <>
       <h1 className="text-center font-bold py-10 text-3xl dark:text-white">
@@ -81,12 +87,19 @@ const Gallery = () => {
                 key={image.id}
                 url={image.url}
                 description={image.description}
-                onClick={(id) => console.log("id: ", id)}
+                onClick={() => setShowImage(image)}
               />
             ))}
           </div>
         </div>
       </section>
+      {showImage && (
+        <ImageModal
+          show={!!showImage}
+          image={showImage}
+          onClose={() => onClose()}
+        />
+      )}
     </>
   );
 };

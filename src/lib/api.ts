@@ -1,13 +1,3 @@
-// const defaultOptions = {
-//   method: "GET",
-//   mode: "cors",
-//   cache: "no-cache",
-//   credentials: "same-origin",
-//   headers: {
-//     "Content-Type": "application/json",
-//   },
-// } as RequestInit;
-
 export type QS = { [key: string]: any };
 
 export interface IApiParams {
@@ -32,7 +22,6 @@ const getDefaultOptions = () => ({
 
 export const getCallUrl = (path: string, qs: QS = {}): string => {
   const serverUri = process.env.REACT_APP_SERVER_URI || "";
-  console.log("serverUri: ", serverUri);
   const url = new URL(serverUri);
   const urlPath = path.startsWith("/") ? path : "/".concat(path);
   url.pathname = url.pathname.concat(urlPath);
@@ -43,15 +32,12 @@ export const getCallUrl = (path: string, qs: QS = {}): string => {
 };
 export const request = async (path: string, params: IRequestParam) => {
   const { qs, ...rest } = params;
-  console.log("requestParams: ", JSON.stringify(params, null, 4));
   const defaultOptions = getDefaultOptions();
   const callOptions = { ...defaultOptions, ...rest } as RequestInit;
   const url = getCallUrl(path, qs);
   const response = await fetch(url, callOptions);
-  const json = await response.json();
-  console.log("call fetch api json: ", json);
   // TODO: add refresh when error
-  return json;
+  return await response.json();
 };
 
 export const getAuthHeader = (token: string): HeadersInit => ({
