@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from "react";
+import React, { MouseEventHandler, useEffect } from "react";
 import cx from "classnames";
 import { createPortal } from "react-dom";
 
@@ -11,11 +11,28 @@ interface ModalProps {
 
 const Modal = ({ show, className, children, onOverlayClick }: ModalProps) => {
   const overlay = "fixed inset-0 z-10 overflow-y-auto bg-slate-900/[.5]";
+  const onClick: MouseEventHandler<HTMLDivElement> = (e) => {
+    if (e.target === e.currentTarget) {
+      onOverlayClick(e);
+    }
+  };
+
+  useEffect(() => {
+    const body = document.querySelector("body");
+    if (!body) {
+      return;
+    }
+    if (show) {
+      body.style.overflow = "hidden";
+    } else {
+      body.style.overflow = "unset";
+    }
+  }, [show]);
 
   const content = show ? (
     <div
       className={cx(overlay, className || "")}
-      onClick={onOverlayClick}
+      onClick={onClick}
       aria-hidden="true"
     >
       {children}
