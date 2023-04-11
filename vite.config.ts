@@ -20,5 +20,21 @@ export default defineConfig(({ mode }) => {
     define: {
       "process.env": process.env,
     },
+    server: {
+      proxy: {
+        "/dev": {
+          target: process.env.PROXY,
+          changeOrigin: true,
+        },
+        "/s3-upload": {
+          target: process.env.REACT_APP_S3_PROXY,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/s3-upload/, ""),
+        },
+      },
+      watch: {
+        ignored: ["./.vite"],
+      },
+    },
   };
 });
