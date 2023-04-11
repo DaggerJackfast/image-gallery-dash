@@ -41,8 +41,13 @@ const Gallery = () => {
       <h1 className="text-center font-bold py-10 text-3xl dark:text-white">
         Image Gallery
       </h1>
-      <div className="flex justify-end">
-        <button onClick={() => setShowCreateImage(true)}>add image</button>
+      <div className="flex justify-end px-5 lg:px-32">
+        <button
+          className="bg-transparent border border-gray-500"
+          onClick={() => setShowCreateImage(true)}
+        >
+          add image
+        </button>
       </div>
       <section className="overflow-hidden text-neutral-700">
         <div className="container mx-auto px-5 py-2 lg:px-32 lg:pt-12">
