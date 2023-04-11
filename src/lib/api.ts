@@ -4,6 +4,7 @@ export interface IApiParams {
   qs?: QS;
   body?: any;
   headers?: HeadersInit;
+  baseUrl?: string;
 }
 export interface IRequestParam extends IApiParams {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE" | "HEAD";
@@ -20,21 +21,28 @@ const getDefaultOptions = () => ({
   headers: defaultHeaders,
 });
 
-export const getCallUrl = (path: string, qs: QS = {}): string => {
-  const serverUri = process.env.REACT_APP_SERVER_URI || "";
+export const getCallUrl = (path: string, params: IApiParams = {}): string => {
+  const { qs, baseUrl } = params;
+  const serverUri = baseUrl || process.env.REACT_APP_SERVER_URI || "";
   const url = new URL(serverUri);
-  const urlPath = path.startsWith("/") ? path : "/".concat(path);
-  url.pathname = url.pathname.concat(urlPath);
-  Object.keys(qs).forEach((key) => {
-    url.searchParams.append(key, qs[key]);
-  });
+  if (path) {
+    const urlPath = path.startsWith("/") ? path : "/".concat(path);
+    url.pathname = url.pathname.concat(urlPath);
+  }
+
+  if (qs) {
+    Object.keys(qs).forEach((key) => {
+      url.searchParams.append(key, qs[key]);
+    });
+  }
+
   return url.toString();
 };
 export const request = async (path: string, params: IRequestParam) => {
-  const { qs, ...rest } = params;
+  const { qs, baseUrl, ...rest } = params;
   const defaultOptions = getDefaultOptions();
   const callOptions = { ...defaultOptions, ...rest } as RequestInit;
-  const url = getCallUrl(path, qs);
+  const url = getCallUrl(path, { qs, baseUrl });
   const response = await fetch(url, callOptions);
   // TODO: add refresh when error
   return await response.json();
@@ -54,6 +62,9 @@ const api = {
   },
   async patch(path: string, params: IApiParams = {}) {
     return request(path, { ...params, method: "PATCH" });
+  },
+  async put(path: string, params: IApiParams = {}) {
+    return request(path, { ...params, method: "PUT" });
   },
   async delete(path: string, params: IApiParams = {}) {
     return request(path, { ...params, method: "DELETE" });
