@@ -1,13 +1,16 @@
 import React, { FormEventHandler, useState } from "react";
 import Modal from "../Modal";
 import CloseIcon from "../../assets/icons/close-icon.svg";
+import LoadingIcon from "../../assets/icons/loading-icon.svg";
 import ImageInput from "../ImageInput";
 import api, { getAuthHeader } from "../../lib/api";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useMutation } from "react-query";
 
 interface CreateImageProps {
   show: boolean;
   onClose: () => void;
+  afterCreate: () => void;
 }
 
 interface IUploadResult {
@@ -17,12 +20,17 @@ interface IUploadResult {
   expires: string;
 }
 
+interface ISendImage {
+  description: string;
+  uploadFileName: string;
+}
+
 interface ICreateImageFormData {
   description: string;
   image: File | null;
 }
 
-const CreateImageModal = ({ show, onClose }: CreateImageProps) => {
+const CreateImageModal = ({ show, onClose, afterCreate }: CreateImageProps) => {
   const initialFormData: ICreateImageFormData = {
     description: "",
     image: null,
@@ -64,26 +72,48 @@ const CreateImageModal = ({ show, onClose }: CreateImageProps) => {
     return uploadFilename;
   };
 
-  const onSubmit: FormEventHandler<HTMLFormElement> = async (
-    e
-  ): Promise<void> => {
-    e.preventDefault();
-    const { image, description } = formData;
-    if (!image) return;
-    const token = await getAccessTokenSilently();
-    const uploadFileName = await uploadImage(image, token);
+  const sendImage = async (
+    { description, uploadFileName }: ISendImage,
+    token: string
+  ) => {
     const createImageParams = {
       description,
       filename: uploadFileName,
     };
-    const createResponse = await api.post("/images", {
+    const createdImage = await api.post("/images", {
       body: JSON.stringify(createImageParams),
       headers: getAuthHeader(token),
     });
-    const createJson = await createResponse.json();
-    console.log("createJson: ", createJson);
-    onCloseClick();
+    return createdImage;
   };
+
+  const createImage = async (data: ICreateImageFormData) => {
+    const { image, description } = data;
+    if (!image) return;
+    const token = await getAccessTokenSilently();
+    const uploadFileName = await uploadImage(image, token);
+    const createdImage = await sendImage(
+      { description, uploadFileName },
+      token
+    );
+    console.log("createdImage: ", createdImage);
+    return createdImage;
+  };
+
+  const { isLoading: isSending, mutateAsync: sendFormData } = useMutation(
+    "create image",
+    (data: ICreateImageFormData) => createImage(data)
+  );
+
+  const onSubmit: FormEventHandler<HTMLFormElement> = async (
+    e
+  ): Promise<void> => {
+    e.preventDefault();
+    await sendFormData(formData);
+    onCloseClick();
+    afterCreate();
+  };
+
   const updateState = (name: string, value: any): void => {
     setFormData({ ...formData, [name]: value });
   };
@@ -92,8 +122,6 @@ const CreateImageModal = ({ show, onClose }: CreateImageProps) => {
     setFormData(initialFormData);
     onClose();
   };
-
-  console.log("formData: ", formData);
 
   return (
     <Modal show={show} onOverlayClick={onCloseClick}>
@@ -131,10 +159,17 @@ const CreateImageModal = ({ show, onClose }: CreateImageProps) => {
                   </div>
                   <div className="pt-5 flex justify-end">
                     <button
+                      disabled={isSending}
                       className="px-7 py-2 bg-indigo-500 hover:bg-indigo-700 text-white cursor-pointer rounded-md"
                       type="submit"
                     >
-                      <span>add</span>
+                      {isSending ? (
+                        <span>
+                          <LoadingIcon className="h-6 w-7" />
+                        </span>
+                      ) : (
+                        <span>add</span>
+                      )}
                     </button>
                   </div>
                 </form>
