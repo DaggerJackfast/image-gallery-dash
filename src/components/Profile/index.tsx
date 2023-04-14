@@ -1,11 +1,23 @@
-import { User } from "@auth0/auth0-react";
+import { User, useAuth0 } from "@auth0/auth0-react";
 import React from "react";
 import CheckBadgeIcon from "../../assets/icons/check-badge-icon.svg";
+import LoadingIcon from "../../assets/icons/loading-icon.svg";
+import { useQuery } from "react-query";
+import api, { getAuthHeader } from "../../lib/api";
 
 interface ProfileProps {
   user: User;
 }
+interface IImagesCount {
+  count: number;
+}
 const Profile = ({ user }: ProfileProps) => {
+  const { getAccessTokenSilently } = useAuth0();
+  const { isLoading, data } = useQuery<IImagesCount>("images count", async () =>
+    api.get("/images-count", {
+      headers: getAuthHeader(await getAccessTokenSilently()),
+    })
+  );
   return (
     <div className="w-full">
       <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 rounded-lg mt-16">
@@ -40,7 +52,11 @@ const Profile = ({ user }: ProfileProps) => {
             <div className="flex justify-center py-4 lg:pt-4 pt-8">
               <div className="mr-4 p-3 text-center">
                 <span className="text-xl font-bold block uppercase tracking-wide text-blueGray-600">
-                  10
+                  {isLoading ? (
+                    <LoadingIcon className="h-6 w-7 fill-black m-auto" />
+                  ) : (
+                    <>{data?.count ?? 0}</>
+                  )}
                 </span>
                 <span className="text-sm text-blueGray-400">Images</span>
               </div>
