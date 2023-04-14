@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PreviewImage from "../PreviewImage";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import api, { getAuthHeader } from "../../lib/api";
 import ImageModal from "../ImageModal";
 import { IImage } from "../../lib/types";
@@ -13,19 +13,28 @@ const IMAGES_KEY = "images";
 const Gallery = () => {
   const { getAccessTokenSilently } = useAuth0();
   const queryClient = useQueryClient();
-  const {
-    isLoading,
-    error,
-    status,
-    data: images,
-  } = useQuery<IImage[]>(IMAGES_KEY, async () =>
+  const { isLoading, data: images } = useQuery<IImage[]>(IMAGES_KEY, async () =>
     api.get("/images", {
       headers: getAuthHeader(await getAccessTokenSilently()),
     })
   );
-  console.log("isLoading: ", isLoading);
-  console.log("error: ", error);
-  console.log("images: ", images);
+
+  const deleteImage = async (deleteImage: IImage) => {
+    await api.delete(`/images/${deleteImage.id}`, {
+      headers: getAuthHeader(await getAccessTokenSilently()),
+    });
+  };
+
+  const { isLoading: isDeleting, mutateAsync: onImageDelete } = useMutation(
+    "delete image",
+    (image: IImage) => deleteImage(image),
+    {
+      onSuccess: () => {
+        onImageClose();
+        clearQuery();
+      },
+    }
+  );
 
   const [showImage, setShowImage] = useState<IImage | null>(null);
   const [showCreateImage, setShowCreateImage] = useState<boolean>(false);
@@ -36,14 +45,6 @@ const Gallery = () => {
 
   const clearQuery = () => {
     queryClient.invalidateQueries(IMAGES_KEY);
-  };
-
-  const onImageDelete = async (deleteImage: IImage) => {
-    await api.delete(`/images/${deleteImage.id}`, {
-      headers: getAuthHeader(await getAccessTokenSilently()),
-    });
-    onImageClose();
-    clearQuery();
   };
 
   const afterCreateImage = () => {
@@ -95,6 +96,7 @@ const Gallery = () => {
         <ImageModal
           show={!!showImage}
           image={showImage}
+          isDeleting={isDeleting}
           onDelete={() => onImageDelete(showImage)}
           onClose={() => onImageClose()}
         />

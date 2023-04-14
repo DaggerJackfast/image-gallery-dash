@@ -51,7 +51,6 @@ const CreateImageModal = ({ show, onClose, afterCreate }: CreateImageProps) => {
       headers: getAuthHeader(token),
     });
     const { uploadUrl, filename: uploadFilename } = response as IUploadResult;
-    console.log("response: ", response);
     let putUploadUrl = uploadUrl;
     if (
       process.env.REACT_APP_NODE_ENV !== "production" &&
@@ -96,7 +95,6 @@ const CreateImageModal = ({ show, onClose, afterCreate }: CreateImageProps) => {
       { description, uploadFileName },
       token
     );
-    console.log("createdImage: ", createdImage);
     return createdImage;
   };
 
