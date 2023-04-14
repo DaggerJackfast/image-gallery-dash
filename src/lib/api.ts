@@ -45,7 +45,14 @@ export const request = async (path: string, params: IRequestParam) => {
   const url = getCallUrl(path, { qs, baseUrl });
   const response = await fetch(url, callOptions);
   // TODO: add refresh when error
-  return await response.json();
+  if (response.status === 204) {
+    return;
+  }
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return await response.json();
+  }
+  return await response.text();
 };
 
 export const getAuthHeader = (token: string): HeadersInit => ({
