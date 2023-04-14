@@ -11,11 +11,6 @@ const audience = process.env.REACT_APP_AUTH0_AUDIENCE as string;
 const redirectUri = (process.env.REACT_APP_REDIRECT_URI ||
   window.location.origin) as string;
 
-console.log("domain: ", domain);
-console.log("clientId: ", clientId);
-console.log("audience: ", audience);
-console.log("redirectUri: ", redirectUri);
-
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <Auth0Provider
