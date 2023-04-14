@@ -3,15 +3,23 @@ import Modal from "../Modal";
 import CloseIcon from "../../assets/icons/xmark-solid-icon.svg";
 import DeleteIcon from "../../assets/icons/trash-solid-icon.svg";
 import InfoIcon from "../../assets/icons/info-solid-icon.svg";
+import LoadingIcon from "../../assets/icons/loading-icon.svg";
 import { IImage } from "../../lib/types";
 import cx from "classnames";
 interface ImageProps {
   show: boolean;
+  isDeleting: boolean;
   onClose: () => void;
   image: IImage;
   onDelete: () => void;
 }
-const ImageModal = ({ show, image, onClose, onDelete }: ImageProps) => {
+const ImageModal = ({
+  show,
+  image,
+  isDeleting,
+  onClose,
+  onDelete,
+}: ImageProps) => {
   const [showDescription, setShowDescription] = useState<boolean>(false);
   const [showDelete, setShowDelete] = useState<boolean>(false);
 
@@ -54,7 +62,7 @@ const ImageModal = ({ show, image, onClose, onDelete }: ImageProps) => {
             </div>
 
             <div
-              className={cx("absolute top-12 p-6 flex flex-col", {
+              className={cx("absolute top-12 right-0 p-6 flex flex-col", {
                 ["hidden"]: !showDescription,
               })}
             >
@@ -74,20 +82,28 @@ const ImageModal = ({ show, image, onClose, onDelete }: ImageProps) => {
                   Are you sure delete the image?
                 </span>
                 <div className="text-center mt-4">
-                  <button
-                    onClick={() => onDeleteClick()}
-                    type="button"
-                    className="px-5 py-2 bg-red-600 mr-4"
-                  >
-                    Yes
-                  </button>
-                  <button
-                    onClick={() => setShowDelete(false)}
-                    type="button"
-                    className="px-5 py-2 bg-slate-600 "
-                  >
-                    No
-                  </button>
+                  {isDeleting ? (
+                    <span className="flex justify-center">
+                      <LoadingIcon className="h-6 w-7" />
+                    </span>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => onDeleteClick()}
+                        type="button"
+                        className="px-5 py-2 bg-red-600 mr-4"
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setShowDelete(false)}
+                        type="button"
+                        className="px-5 py-2 bg-slate-600 "
+                      >
+                        No
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
